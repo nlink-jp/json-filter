@@ -7,22 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [v1.2.0] - 2026-03-28
 
 ### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- Migrated to nlink-jp organisation — module path updated to `github.com/nlink-jp/json-filter`
+- Standardised Makefile: `dist/` output, `build` / `build-all` / `package` / `test` / `clean` targets; added `linux/arm64` platform
+- Updated README to follow organisation conventions (description → features → installation → usage → building)
 
 ## [v1.1.0] - 2025-10-02
 
 ### Added
 - Add support for JSON arrays as a valid input format.
+
+[Unreleased]: https://github.com/nlink-jp/json-filter/compare/v1.2.0...HEAD
+[v1.2.0]: https://github.com/nlink-jp/json-filter/compare/v1.1.0...v1.2.0
+[v1.1.0]: https://github.com/nlink-jp/json-filter/compare/v1.0.0...v1.1.0
+[v1.0.0]: https://github.com/nlink-jp/json-filter/releases/tag/v1.0.0
 
 ## [v1.0.0] - 2025-08-28
 

@@ -1,66 +1,56 @@
 # json-filter
 
-`json-filter` is a powerful command-line tool designed to extract, validate, prettify, and even attempt to fix incomplete JSON data from various inputs, primarily standard input. It's ideal for processing logs, API responses, or any text stream that might contain JSON.
+A command-line filter that extracts, validates, prettifies, and repairs JSON from arbitrary text streams — ideal for processing LLM outputs, API responses, and log data.
 
 ## Features
 
--   **Intelligent JSON Extraction**: Automatically identifies and extracts JSON objects or arrays embedded within larger text streams or logs using a robust regular expression.
--   **Automatic Prettification**: Valid JSON is automatically formatted with proper indentation for enhanced readability.
--   **Incomplete JSON Recovery**: Attempts to repair malformed or truncated JSON by intelligently adding missing closing braces (`}`) or brackets (`]`). This is particularly useful when dealing with partial JSON outputs.
--   **Bypass Mode**: A `--bypass` flag allows the original input to be passed through to standard output if JSON extraction or parsing fails, preventing pipeline interruptions.
--   **Version Information**: Supports a `--version` flag to display the tool's version, commit hash, and build date.
+- **JSON extraction**: Identifies and extracts JSON objects or arrays embedded in larger text streams using robust pattern matching
+- **Automatic prettification**: Formats valid JSON with proper indentation
+- **Incomplete JSON recovery**: Repairs malformed or truncated JSON by adding missing closing braces and brackets
+- **Bypass mode**: `--bypass` passes the original input through to stdout if extraction fails, preventing pipeline interruptions
 
 ## Installation
 
-To install `json-filter`, ensure you have Go installed (version 1.16 or higher).
+Download the latest binary for your platform from the [releases page](https://github.com/nlink-jp/json-filter/releases).
 
-```bash
-git clone https://github.com/magifd2/json-filter.git
-cd json-filter
-make
-sudo mv bin/json-filter-cli /usr/local/bin/
+Extract and place the binary in your `$PATH`:
+
+```sh
+unzip json-filter-<version>-<os>-<arch>.zip
+mv json-filter /usr/local/bin/
 ```
 
 ## Usage
 
-`json-filter` reads from standard input and writes the processed JSON to standard output.
+`json-filter` reads from stdin and writes processed JSON to stdout.
 
-```bash
-<your_command_output_with_json> | json-filter [flags]
+```sh
+<command> | json-filter [flags]
 ```
 
 ### Flags
 
--   `--bypass`: If JSON parsing fails, output the original input instead of an error.
-    ```bash
-    echo "Some text before {\"key\": \"value\"" | json-filter --bypass
-    # Output: Some text before {"key": "value"
-    ```
--   `--version`: Print version information and exit.
-    ```bash
-    json-filter --version
-    # Output: json-filter-cli version: ..., commit: ..., built on: ...
-    ```
+| Flag | Description |
+|------|-------------|
+| `--bypass` | Pass original input through if JSON extraction fails |
+| `--version` | Print version information and exit |
 
 ### Examples
 
-**Basic JSON Extraction and Prettification:**
+**Extract and prettify JSON from log output:**
 
-```bash
-echo 'INFO: User data: {"id": 123, "name": "Alice", "email": "alice@example.com"}' | json-filter
-# Output:
+```sh
+echo 'INFO: data: {"id": 1, "name": "Alice"}' | json-filter
 # {
-#   "id": 123,
-#   "name": "Alice",
-#   "email": "alice@example.com"
+#   "id": 1,
+#   "name": "Alice"
 # }
 ```
 
-**Handling Incomplete JSON:**
+**Repair incomplete JSON:**
 
-```bash
-echo '{"data": {"item": "value"'
-# Output:
+```sh
+echo '{"data": {"item": "value"' | json-filter
 # {
 #   "data": {
 #     "item": "value"
@@ -68,48 +58,45 @@ echo '{"data": {"item": "value"'
 # }
 ```
 
-**Handling JSON Array:**
+**Process a JSON array:**
 
-```bash
-echo '[{"id": 1, "name": "foo"}, {"id": 2, "name": "bar"}]' | json-filter
-# Output:
+```sh
+echo '[{"id": 1}, {"id": 2}]' | json-filter
 # [
-#   {
-#     "id": 1,
-#     "name": "foo"
-#   },
-#   {
-#     "id": 2,
-#     "name": "bar"
-#   }
+#   {"id": 1},
+#   {"id": 2}
 # ]
 ```
 
-**Using with `curl`:**
+**Use with curl:**
 
-```bash
+```sh
 curl -s https://api.github.com/users/octocat | json-filter
-# Output: (prettified JSON response from GitHub API)
 ```
 
-## Development
+**Use --bypass to avoid breaking a pipeline:**
 
-### Building from Source
-
-```bash
-make
+```sh
+some-command | json-filter --bypass | next-command
 ```
 
-This will build the `json-filter-cli` executable in the `bin/` directory.
+## Building
 
-### Running Tests
+Requires Go 1.16 or later.
 
-(No tests are currently implemented, but this section is a placeholder for future development.)
+```sh
+git clone https://github.com/nlink-jp/json-filter.git
+cd json-filter
+make build        # Build for the current platform → dist/json-filter
+make build-all    # Cross-compile for all platforms → dist/json-filter-<os>-<arch>
+make package      # Build and create .zip archives → dist/json-filter-<version>-<os>-<arch>.zip
+make test         # Run the test suite
+make clean        # Remove dist/
+```
 
-## Contributing
+Target platforms: `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`, `windows/amd64`.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## See Also
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- [README.ja.md](README.ja.md) — 日本語ドキュメント
+- [CHANGELOG.md](CHANGELOG.md)
