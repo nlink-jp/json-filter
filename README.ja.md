@@ -6,9 +6,18 @@ English documentation: [README.md](README.md)
 
 ## 特徴
 
-- **JSON 抽出**: 正規表現を使ってテキストストリームに埋め込まれた JSON オブジェクト・配列を識別・抽出
-- **自動整形**: 有効な JSON を適切なインデントでフォーマット
-- **不完全 JSON の修復**: 欠損している閉じ括弧・角括弧を補完してマルフォームド／切り詰め JSON を修復
+- **JSON 抽出**: 再帰降下パーサー（[nlk/jsonfix](https://github.com/nlink-jp/nlk)）を使ってテキストストリームに埋め込まれた JSON オブジェクト・配列を識別・抽出
+- **自動整形**: 有効な JSON を 2 スペースインデントでフォーマット
+- **強力な JSON 修復**: LLM 出力・API レスポンス・ログデータに見られる 20 種以上の問題を修復:
+  - Markdown コードフェンス（`` ```json ... ``` ``）
+  - シングルクォートのキー・値
+  - 末尾カンマ
+  - クォートなしキー
+  - 閉じ括弧・角括弧の欠損（深いネストにも対応）
+  - コメント（`//`、`/* */`、`#`）
+  - Python 形式リテラル（`True`、`False`、`None`）
+  - 二重エスケープ JSON（`{\"key\": \"value\"}`）
+  - その他 — 全一覧は [nlk/jsonfix ドキュメント](https://github.com/nlink-jp/nlk) を参照
 - **バイパスモード**: `--bypass` フラグで抽出失敗時に元の入力をそのまま stdout に流し、パイプラインの中断を防止
 
 ## インストール
@@ -58,6 +67,25 @@ echo '{"data": {"item": "value"' | json-filter
 # }
 ```
 
+**Markdown コードフェンスから JSON を抽出:**
+
+```sh
+printf '```json\n{"key": "value"}\n```\n' | json-filter
+# {
+#   "key": "value"
+# }
+```
+
+**シングルクォート・末尾カンマ・クォートなしキーを修復:**
+
+```sh
+echo "{'name': 'Alice', 'age': 30,}" | json-filter
+# {
+#   "name": "Alice",
+#   "age": 30
+# }
+```
+
 **curl と組み合わせて使用:**
 
 ```sh
@@ -66,7 +94,7 @@ curl -s https://api.github.com/users/octocat | json-filter
 
 ## ビルド
 
-Go 1.16 以上が必要です。
+Go 1.26 以上が必要です。
 
 ```sh
 git clone https://github.com/nlink-jp/json-filter.git

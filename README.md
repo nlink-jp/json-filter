@@ -4,9 +4,18 @@ A command-line filter that extracts, validates, prettifies, and repairs JSON fro
 
 ## Features
 
-- **JSON extraction**: Identifies and extracts JSON objects or arrays embedded in larger text streams using robust pattern matching
-- **Automatic prettification**: Formats valid JSON with proper indentation
-- **Incomplete JSON recovery**: Repairs malformed or truncated JSON by adding missing closing braces and brackets
+- **JSON extraction**: Identifies and extracts JSON objects or arrays embedded in larger text streams using a recursive descent parser ([nlk/jsonfix](https://github.com/nlink-jp/nlk))
+- **Automatic prettification**: Formats valid JSON with 2-space indentation
+- **Robust JSON repair**: Fixes 20+ common issues found in LLM output, API responses, and log data:
+  - Markdown code fences (`` ```json ... ``` ``)
+  - Single-quoted keys and values
+  - Trailing commas
+  - Unquoted keys
+  - Missing closing braces/brackets (including deeply nested)
+  - Comments (`//`, `/* */`, `#`)
+  - Python-style literals (`True`, `False`, `None`)
+  - Double-escaped JSON (`{\"key\": \"value\"}`)
+  - And more — see [nlk/jsonfix documentation](https://github.com/nlink-jp/nlk) for the full list
 - **Bypass mode**: `--bypass` passes the original input through to stdout if extraction fails, preventing pipeline interruptions
 
 ## Installation
@@ -58,14 +67,23 @@ echo '{"data": {"item": "value"' | json-filter
 # }
 ```
 
-**Process a JSON array:**
+**Extract JSON from markdown code fences:**
 
 ```sh
-echo '[{"id": 1}, {"id": 2}]' | json-filter
-# [
-#   {"id": 1},
-#   {"id": 2}
-# ]
+printf '```json\n{"key": "value"}\n```\n' | json-filter
+# {
+#   "key": "value"
+# }
+```
+
+**Fix single-quoted keys, trailing commas, and unquoted keys:**
+
+```sh
+echo "{'name': 'Alice', 'age': 30,}" | json-filter
+# {
+#   "name": "Alice",
+#   "age": 30
+# }
 ```
 
 **Use with curl:**
@@ -82,7 +100,7 @@ some-command | json-filter --bypass | next-command
 
 ## Building
 
-Requires Go 1.16 or later.
+Requires Go 1.26 or later.
 
 ```sh
 git clone https://github.com/nlink-jp/json-filter.git
