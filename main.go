@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
+
+	"github.com/nlink-jp/nlk/jsonfix"
 )
 
 // The following variables are set during build time by the linker.
@@ -17,25 +19,6 @@ var (
 	commit  = "none"
 	date    = "unknown"
 )
-
-// fixIncompleteJSON attempts to fix a JSON string by adding missing closing braces or brackets.
-func fixIncompleteJSON(s string) string {
-	trimmedS := strings.TrimSpace(s)
-	if strings.HasPrefix(trimmedS, "{") {
-		openCount := strings.Count(s, "{")
-		closeCount := strings.Count(s, "}")
-		if openCount > closeCount {
-			return s + strings.Repeat("}", openCount-closeCount)
-		}
-	} else if strings.HasPrefix(trimmedS, "[") {
-		openCount := strings.Count(s, "[")
-		closeCount := strings.Count(s, "]")
-		if openCount > closeCount {
-			return s + strings.Repeat("]", openCount-closeCount)
-		}
-	}
-	return ""
-}
 
 // processInput reads all data from standard input and returns it as a single string.
 func processInput() (string, error) {
@@ -51,52 +34,22 @@ func processInput() (string, error) {
 	return input.String(), nil
 }
 
-// extractAndValidateJSON extracts a JSON string from the input and validates it.
-// It also attempts to fix common parsing errors like missing closing braces.
+// extractAndValidateJSON extracts a JSON string from the input, repairs it if
+// needed, and returns prettified output. Powered by nlk/jsonfix.
 func extractAndValidateJSON(input string) (string, error) {
-	// Define a regular expression to find a JSON object or array.
-	re := regexp.MustCompile(`(?s)({.*}|\[.*\])`)
-
-	// Find the first match of the JSON pattern.
-	match := re.FindStringSubmatch(input)
-
-	if len(match) > 1 {
-		jsonString := strings.TrimSpace(match[1])
-		jsonBytes := []byte(jsonString)
-		var j interface{}
-
-		err := json.Unmarshal(jsonBytes, &j)
-		if err == nil {
-			// If successful, return the valid JSON string.
-			var prettyJSON bytes.Buffer
-			if err := json.Indent(&prettyJSON, jsonBytes, "", "  "); err == nil {
-				return prettyJSON.String(), nil
-			}
-			return jsonString, nil
+	result, err := jsonfix.Extract(input)
+	if err != nil {
+		if errors.Is(err, jsonfix.ErrNoJSON) {
+			return "", fmt.Errorf("No valid JSON found in the input.")
 		}
-
-		// If there's a parsing error, check if it's due to an unexpected end of input.
-		if strings.Contains(err.Error(), "unexpected end of JSON input") {
-			fixedJSON := fixIncompleteJSON(jsonString)
-			if fixedJSON != "" {
-				var fixedJ interface{}
-				if json.Unmarshal([]byte(fixedJSON), &fixedJ) == nil {
-					// If the fix works, return the corrected JSON.
-					var prettyFixedJSON bytes.Buffer
-					if err := json.Indent(&prettyFixedJSON, []byte(fixedJSON), "", "  "); err == nil {
-						return prettyFixedJSON.String(), nil
-					}
-					return fixedJSON, nil
-				}
-			}
-		}
-
-		// If all attempts fail, return an error.
-		return "", fmt.Errorf("Could not parse or fix the extracted JSON. Original output: %s", jsonString)
-
+		return "", fmt.Errorf("Could not parse or fix the extracted JSON. Original output: %s", strings.TrimSpace(input))
 	}
-	// If no JSON was found, return an error.
-	return "", fmt.Errorf("No valid JSON found in the input.")
+
+	var prettyJSON bytes.Buffer
+	if err := json.Indent(&prettyJSON, []byte(result), "", "  "); err != nil {
+		return result, nil
+	}
+	return prettyJSON.String(), nil
 }
 
 // handleOutput prints the result or handles the error based on the bypass flag.
