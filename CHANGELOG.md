@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.0.1] - 2026-05-22
+
+### Changed
+
+- **Releases are now Developer ID signed and Apple-notarized.**
+  Darwin release zips (`json-filter-v2.0.1-darwin-{amd64,arm64}.zip`)
+  carry full Apple Developer ID Application signatures and Apple
+  notarization tickets. End users on macOS no longer need to
+  bypass Gatekeeper with right-click → Open or
+  `xattr -d com.apple.quarantine` on first launch. Local users
+  who place `json-filter` under Dropbox-synced (or any other
+  FileProvider-managed) paths are no longer killed by macOS's
+  ad-hoc + provenance distrust policy. Pipeline:
+  `scripts/codesign-darwin.sh` + `scripts/notarize-darwin.sh`,
+  driven by `make package`. See `nlink-jp/.github`
+  CONVENTIONS.md §"Code Signing and Notarization (macOS)" for
+  the org-wide convention this implements.
+
 ## [v2.0.0] - 2026-04-13
 
 ### Changed
