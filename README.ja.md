@@ -106,7 +106,7 @@ make test         # テストを実行
 make clean        # dist/ を削除
 ```
 
-対応プラットフォーム: `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`, `windows/amd64`
+対応プラットフォーム: `linux/amd64`, `linux/arm64`, `darwin/arm64`, `windows/amd64`（macOS は arm64 のみ・Intel は非対応。Intel Mac はソースからビルド可能）
 
 ## 関連リンク
 
