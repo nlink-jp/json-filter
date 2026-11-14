@@ -11,6 +11,7 @@ arbitrary text streams. Powered by nlk/jsonfix. Part of util-series.
 make build          # Build → dist/json-filter
 make test           # Run all tests
 make build-all      # Cross-compile for 4 platforms (darwin arm64 only; no Intel)
+make vuln            # govulncheck over the build; `make package` runs it first and stops on a finding
 make verify-release  # gate: notarized, fresh, runs at this version, clean linux archives (run before upload)
 make clean          # Remove dist/
 ```
