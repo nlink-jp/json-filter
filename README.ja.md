@@ -94,7 +94,7 @@ curl -s https://api.github.com/users/octocat | json-filter
 
 ## ビルド
 
-Go 1.26 以上が必要です。
+Go 1.27.4 以上が必要です。
 
 ```sh
 git clone https://github.com/nlink-jp/json-filter.git

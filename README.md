@@ -100,7 +100,7 @@ some-command | json-filter --bypass | next-command
 
 ## Building
 
-Requires Go 1.26 or later.
+Requires Go 1.27.4 or later.
 
 ```sh
 git clone https://github.com/nlink-jp/json-filter.git
