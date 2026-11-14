@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1.1] - 2026-11-14
+
+### Security
+
+- **Rebuilt with Go 1.27.4, which `go.mod` now requires** (it was `go 1.26.2`).
+  No code of the tool changed. v2.1.0 was built with Go 1.26.4, and 24
+  standard-library advisories have been fixed since. `govulncheck -mode binary`
+  finds none of the affected functions in the published binary — the tool links
+  neither `net/http` nor `crypto/tls` — so this brings the build onto a current
+  toolchain rather than closing a known exposure.
+
+### Changed
+
+- `make package` runs `govulncheck ./...` first (`make vuln`) and stops on a
+  finding, so a release cannot be built past one.
+
 ### Fixed
 
 - **`make verify-release` now fails closed.** Its last block chained unzip, the
